@@ -1,0 +1,79 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "ase-name": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the ase"
+            }
+        },
+        "vnet-name": {
+            "type": "string",
+            "metadata": {
+                "description": "The vnet name"
+            }
+        },
+        "subnet-name": {
+            "type": "string",
+            "metadata": {
+                "description": "The ASE subnet name"
+            }
+        }
+    },
+    "functions": [],
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('vnet-name')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                }
+            },
+            "resources": [
+                {
+                    "type": "subnets",
+                    "apiVersion": "2020-05-01",
+                    "name": "[parameters('subnet-name')]",
+                    "location": "[resourceGroup().location]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnet-name'))]"
+                    ],
+                    "properties": {
+                        "addressPrefix": "10.0.0.0/24"
+                    }
+                }
+            ]
+        },
+
+        {
+            "type": "Microsoft.Web/hostingEnvironments",
+            "kind": "ASEV2",
+            "name": "[parameters('ase-name')]",
+            "apiVersion": "2019-02-01",
+            "dependson": [
+                "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnet-name'))]"
+            ],
+            "location": "[resourceGroup().location]",
+            "zones": [
+                "2"
+            ],
+            "properties": {
+                "name": "[parameters('ase-name')]",
+                "location": "[resourceGroup().location]",
+                "ipSslAddressCount": 0,
+                "internalLoadBalancingMode": "3",
+                "virtualNetwork": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets',parameters('vnet-name'),parameters('subnet-name'))]"
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}
