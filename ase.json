@@ -58,7 +58,7 @@
             "name": "[parameters('ase-name')]",
             "apiVersion": "2019-02-01",
             "dependson": [
-                "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnet-name'))]"
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets',parameters('vnet-name'),parameters('subnet-name'))]"
             ],
             "location": "[resourceGroup().location]",
             "zones": [
